@@ -4,6 +4,14 @@
     "surname": "Bardai",
     "email": "faizan.badruddin.bardai@gmail.com",
     "dob": "01/02/1989",
-    "_id":"1"
+    "_id": "1"
+  },
+  {
+    "name": "Student 2",
+    "surname": "Student 2",
+    "email": "student@student.com",
+    "dob": "01/02/2005",
+    "_id": 2,
+    "createdAt": "2019-12-11T01:44:34.606Z"
   }
 ]

@@ -1,9 +1,12 @@
-const cors = require("cors");
 const express = require("express");
-const studentsRouter = require("./services/students")
-const server = express()
+const cors = require("cors");
+
+const server = express();
 const port = 3001;
-server.use(express.json()); 
-server.use(cors());
+const studentsRouter = require("./services/students");
+
+server.use(express.json());
 server.use("/students", studentsRouter);
+server.use(cors());
+
 server.listen(port, () => console.log(`Listening on port ${port}!`));
