@@ -14,21 +14,34 @@ const readFile = filePath => {
 const writeFile = (filePath, student) => {
   const buffer = JSON.stringify(student);
   fs.writeFileSync(filePath, buffer);
-}
+};
 
 router.get("/", (req, res) => {
   const studentsArray = readFile(filePath);
-  res.send(studentsArray);
+  const studentsNameAndId = studentsArray.map(student => {
+    let container = {
+      fullName: `${student.name} ${student.surname}`,
+      ID: student._id
+    };
+    return container;
+  });
+  res.send(studentsNameAndId);
 });
 
 router.post("/", (req, res) => {
-  let student=req.body;
   let allStudents = readFile(filePath);
-  student._id = allStudents.length + 1
-  student.createdAt = new Date();
+  let student = {
+    ...req.body,
+    _id: allStudents.length + 1,
+    createdAt: new Date()
+  };
   allStudents.push(student);
   writeFile(filePath, allStudents);
-  res.send(student);
-})
+  let container = {
+    fullName: `${student.name} ${student.surname}`,
+    ID: student._id
+  };
+  res.send(container);
+});
 
 module.exports = router;

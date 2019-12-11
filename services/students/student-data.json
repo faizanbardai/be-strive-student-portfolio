@@ -1,17 +1,1 @@
-[
-  {
-    "name": "FayJu",
-    "surname": "Bardai",
-    "email": "faizan.badruddin.bardai@gmail.com",
-    "dob": "01/02/1989",
-    "_id": "1"
-  },
-  {
-    "name": "Student 2",
-    "surname": "Student 2",
-    "email": "student@student.com",
-    "dob": "01/02/2005",
-    "_id": 2,
-    "createdAt": "2019-12-11T01:44:34.606Z"
-  }
-]
+[{"name":"Faizan","surname":"Bardai","email":"faizan.badruddin.bardai@gmail.com","dob":"2019-12-01","_id":1,"createdAt":"2019-12-11T15:58:33.830Z"},{"name":"Faizan","surname":"Bardai","email":"faizan.badruddin.bardai@gmail.com","dob":"2019-12-01","_id":2,"createdAt":"2019-12-11T15:59:28.752Z"},{"name":"Faizan","surname":"Bardai","email":"faizan.badruddin.bardai@gmail.com","dob":"2019-12-01","_id":3,"createdAt":"2019-12-11T16:31:14.110Z"}]
