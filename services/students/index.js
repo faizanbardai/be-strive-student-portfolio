@@ -2,6 +2,8 @@ const express = require("express");
 const fs = require("fs");
 const path = require("path");
 const router = express.Router();
+const { check, validationResult } = require('express-validator');
+
 
 const filePath = path.join(__dirname, "student-data.json");
 
@@ -28,7 +30,11 @@ router.get("/", (req, res) => {
   res.send(studentsNameAndId);
 });
 
-router.post("/", (req, res) => {
+router.post("/", [check("email").isEmail()],(req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.array() });
+  }
   let allStudents = readFile(filePath);
   let student = {
     ...req.body,
