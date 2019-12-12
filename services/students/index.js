@@ -1,40 +1,31 @@
 const express = require("express");
-const fs = require("fs");
+const { readFile, writeFile } = require("fs-extra");
 const path = require("path");
 const router = express.Router();
-const { check, validationResult } = require("express-validator");
+const { sanitize, check, validationResult } = require("express-validator");
 
 const filePath = path.join(__dirname, "student-data.json");
 
-const readFile = filePath => {
-  const buffer = fs.readFileSync(filePath);
+const writeStudentFile = async (path, student) => {
+  const buffer = JSON.stringify(student);
+  await writeFile(path, buffer);
+};
+
+const readStudentFile = async path => {
+  const buffer = await readFile(filePath);
   const fileContent = buffer.toString();
   return JSON.parse(fileContent);
 };
 
-const writeFile = (filePath, student) => {
-  const buffer = JSON.stringify(student);
-  fs.writeFileSync(filePath, buffer);
-};
-
-const studentsArray = readFile(filePath);
-
-router.get("/", (req, res) => {
-  const studentsNameAndId = studentsArray.map(student => {
-    let container = {
-      fullName: `${student.name} ${student.surname}`,
-      ID: student._id
-    };
-    return container;
-  });
-  res.send(studentsNameAndId);
+router.get("/", async (req, res) => {
+  const studentsArray = await readStudentFile(filePath);
+  res.send(studentsArray);
 });
 
-router.get("/:id", (req, res) => {
+router.get("/:id", [sanitize("id").toInt()], async (req, res) => {
+  const studentsArray = await readStudentFile(filePath);
   const studentID = req.params.id;
-  const student = studentsArray.find(
-    student => student._id === parseInt(studentID)
-  );
+  const student = studentsArray.find(student => student._id === studentID);
   res.send(student);
 });
 
@@ -46,12 +37,13 @@ router.get(
       .normalizeEmail()
       .withMessage("Email is not valid!")
   ],
-  (req, res) => {
+  async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(422).json({ errors: errors.array() });
     }
     const email = req.params.email;
+    const studentsArray = await readStudentFile(filePath);
     let answer = studentsArray.filter(student => student.email === email);
     return res.send(answer.length ? false : true);
   }
@@ -78,23 +70,20 @@ router.post(
         "Date of birth should be formatted as per ISO8601 and must be before today!"
       )
   ],
-  (req, res) => {
+  async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(422).json({ errors: errors.array() });
     }
+    const studentsArray = await readStudentFile(filePath);
     let student = {
       ...req.body,
-      _id: parseInt(studentsArray.length + 1),
+      _id: studentsArray.length + 1,
       createdAt: new Date()
     };
     studentsArray.push(student);
-    writeFile(filePath, studentsArray);
-    let container = {
-      fullName: `${student.name} ${student.surname}`,
-      ID: student._id
-    };
-    res.send(container);
+    writeStudentFile(filePath, studentsArray);
+    res.send(student);
   }
 );
 
