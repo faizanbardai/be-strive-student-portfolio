@@ -1,10 +1,11 @@
 const express = require("express");
+var multer = require("multer");
 const { readFile, writeFile } = require("fs-extra");
 const path = require("path");
 const router = express.Router();
 const { sanitize, check, validationResult } = require("express-validator");
 
-const filePath = path.join(__dirname, "student-data.json");
+const studentDataFilePath = path.join(__dirname, "student-data.json");
 
 const writeStudentFile = async (path, student) => {
   const buffer = JSON.stringify(student);
@@ -12,18 +13,18 @@ const writeStudentFile = async (path, student) => {
 };
 
 const readStudentFile = async path => {
-  const buffer = await readFile(filePath);
+  const buffer = await readFile(studentDataFilePath);
   const fileContent = buffer.toString();
   return JSON.parse(fileContent);
 };
 
 router.get("/", async (req, res) => {
-  const studentsArray = await readStudentFile(filePath);
+  const studentsArray = await readStudentFile(studentDataFilePath);
   res.send(studentsArray);
 });
 
 router.get("/:id", [sanitize("id").toInt()], async (req, res) => {
-  const studentsArray = await readStudentFile(filePath);
+  const studentsArray = await readStudentFile(studentDataFilePath);
   const studentID = req.params.id;
   const student = studentsArray.find(student => student._id === studentID);
   res.send(student);
@@ -43,7 +44,7 @@ router.get(
       return res.status(422).json({ errors: errors.array() });
     }
     const email = req.params.email;
-    const studentsArray = await readStudentFile(filePath);
+    const studentsArray = await readStudentFile(studentDataFilePath);
     let answer = studentsArray.filter(student => student.email === email);
     return res.send(answer.length ? false : true);
   }
@@ -75,16 +76,28 @@ router.post(
     if (!errors.isEmpty()) {
       return res.status(422).json({ errors: errors.array() });
     }
-    const studentsArray = await readStudentFile(filePath);
+    const studentsArray = await readStudentFile(studentDataFilePath);
     let student = {
       ...req.body,
       _id: studentsArray.length + 1,
       createdAt: new Date()
     };
     studentsArray.push(student);
-    writeStudentFile(filePath, studentsArray);
+    writeStudentFile(studentDataFilePath, studentsArray);
     res.send(student);
   }
 );
+
+var upload = multer({});
+
+router.post("/:id/uploadPhoto", upload.single("studentImg"), async (req, res) => {
+  const studentID = req.body.studentID;
+  const {originalname, buffer} = req.file;
+  const ext = path.extname(originalname);
+  const fileNameToBeSaved = studentID.concat(ext);
+  const filepath = path.join(__dirname, "../../public/img/students/").concat(fileNameToBeSaved);
+  await writeFile(filepath, buffer);
+  res.send(filepath);
+});
 
 module.exports = router;
