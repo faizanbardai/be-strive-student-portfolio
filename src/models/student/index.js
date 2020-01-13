@@ -1,15 +1,23 @@
-var mongoose = require("mongoose");
+const mongoose = require("mongoose");
 
-var Schema = mongoose.Schema,
-  ObjectId = Schema.ObjectId;
+const Schema = mongoose.Schema;
 
-var studentSchema = new Schema({
-  name: {type: String, required: true},
-  surname: {type: String, required: true},
-  email: {type: String, required: true},
-  dob: {type: String, required: true}
-});
+const studentSchema = new Schema(
+  {
+    name: { type: String, required: true },
+    surname: { type: String, required: true },
+    email: { type: String, required: true },
+    dob: { type: String, required: true },
+    projects: [
+      {
+        _id: { type: String },
+        name: { type: String }
+      }
+    ]
+  },
+  { timestamps: { createdAt: "created_at" } }
+);
 
-var studentCollection = mongoose.model('student', studentSchema);
+const studentCollection = mongoose.model("student", studentSchema);
 
 module.exports = studentCollection;

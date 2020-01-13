@@ -1,34 +1,13 @@
 const express = require("express");
-var multer = require("multer");
-const { readFile, writeFile } = require("fs-extra");
-const path = require("path");
 const router = express.Router();
-const { sanitize, check, validationResult } = require("express-validator");
+const { check, validationResult } = require("express-validator");
 const Student = require("../../src/models/student");
-const studentDataFilePath = path.join(__dirname, "student-data.json");
-
-const writeStudentFile = async (path, student) => {
-  const buffer = JSON.stringify(student);
-  await writeFile(path, buffer);
-};
-
-// Moving from fs-extra to MongoDB
-// const readStudentFile = async path => {
-//   const buffer = await readFile(studentDataFilePath);
-//   const fileContent = buffer.toString();
-//   return JSON.parse(fileContent);
-// };
 
 router.get("/", async (req, res) => {
-  // const studentsArray = await readStudentFile(studentDataFilePath);
-  // res.send(studentsArray);
-  res.send(await Student.find());
+  res.send(await Student.find({}, { name: 1 }, { skip: 1 }));
 });
 
 router.get("/:id", async (req, res) => {
-  // const studentsArray = await readStudentFile(studentDataFilePath);
-  // const studentID = req.params.id;
-  // const student = studentsArray.find(student => student._id === studentID);
   try {
     const result = await Student.findById({ _id: req.params.id });
     if (result) res.send(result);
@@ -52,12 +31,9 @@ router.get(
       return res.status(422).json({ errors: errors.array() });
     }
     const email = req.params.email;
-    // const studentsArray = await readStudentFile(studentDataFilePath);
-    // let answer = studentsArray.filter(student => student.email === email);
-    // return res.send(answer.length ? false : true);
     try {
-      const result = await Student.find({ email: req.params.email });
-      res.send(result.length ? false : true);
+      const result = await Student.findOne({ email: req.params.email });
+      res.send(result ? false : true);
     } catch (error) {
       console.log(error);
     }
@@ -89,41 +65,19 @@ router.post(
     if (!errors.isEmpty()) {
       return res.status(422).json({ errors: errors.array() });
     }
-    // const studentsArray = await readStudentFile(studentDataFilePath);
     let student = {
       ...req.body,
-      // _id: studentsArray.length + 1,
       createdAt: new Date()
     };
-    // studentsArray.push(student);
-    // writeStudentFile(studentDataFilePath, studentsArray);
     try {
       const newStudent = await Student.create(student);
-      newStudent.save();
+      await newStudent.save();
       res.send(newStudent);
     } catch (error) {
       res.status(500).send(error);
     }
   }
 );
-
-// var upload = multer({});
-
-// router.post(
-//   "/:id/uploadPhoto",
-//   upload.single("studentImg"),
-//   async (req, res) => {
-//     const studentID = req.body.studentID;
-//     const { originalname, buffer } = req.file;
-//     const ext = path.extname(originalname);
-//     const fileNameToBeSaved = studentID.concat(ext);
-//     const filepath = path
-//       .join(__dirname, "../../public/img/students/")
-//       .concat(fileNameToBeSaved);
-//     await writeFile(filepath, buffer);
-//     res.send(filepath);
-//   }
-// );
 
 router.delete("/:id", async (req, res) => {
   try {
@@ -133,6 +87,11 @@ router.delete("/:id", async (req, res) => {
   } catch (error) {
     console.log(error);
   }
+});
+
+router.put("/:id", async (req, res) => {
+  try {
+  } catch (error) {}
 });
 
 module.exports = router;
