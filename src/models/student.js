@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-
 const Schema = mongoose.Schema;
 
 const studentSchema = new Schema(
@@ -8,16 +7,11 @@ const studentSchema = new Schema(
     surname: { type: String, required: true },
     email: { type: String, required: true },
     dob: { type: String, required: true },
-    projects: [
-      {
-        _id: { type: String },
-        name: { type: String }
-      }
-    ]
+    projects: [{ type: Schema.Types.ObjectId, ref: "Project" }]
   },
-  { timestamps: { createdAt: "created_at" } }
+  { timestamps: true }
 );
 
-const studentCollection = mongoose.model("student", studentSchema);
+const studentCollection = mongoose.model("Student", studentSchema);
 
 module.exports = studentCollection;

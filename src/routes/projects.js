@@ -1,8 +1,8 @@
 const express = require("express");
 const { ObjectID } = require("mongodb");
 const router = express.Router();
-const Project = require("../../src/models/project");
-const Student = require("../../src/models/student");
+const Project = require("../models/project");
+const Student = require("../models/student");
 const { check, validationResult } = require("express-validator");
 
 router.get("/", async (req, res) => {

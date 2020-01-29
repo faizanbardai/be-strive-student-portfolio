@@ -1,10 +1,17 @@
 const express = require("express");
 const router = express.Router();
 const { check, validationResult } = require("express-validator");
-const Student = require("../../src/models/student");
+const Student = require("../models/student");
 
 router.get("/", async (req, res) => {
-  res.send(await Student.find({}, { name: 1 }, { skip: 1 }));
+  try {
+    const documentCount = await Student.estimatedDocumentCount();
+    const studentsFound = await Student.find({});
+    res.json({ documentCount, studentsFound });
+  } catch (error) {
+    res.json(error);
+    console.log(error);
+  }
 });
 
 router.get("/:id", async (req, res) => {
@@ -17,28 +24,28 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.get(
-  "/checkEmail/:email",
-  [
-    check("email")
-      .isEmail()
-      .normalizeEmail()
-      .withMessage("Email is not valid!")
-  ],
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(422).json({ errors: errors.array() });
-    }
-    const email = req.params.email;
-    try {
-      const result = await Student.findOne({ email: req.params.email });
-      res.send(result ? false : true);
-    } catch (error) {
-      console.log(error);
-    }
-  }
-);
+// router.get(
+//   "/checkEmail/:email",
+//   [
+//     check("email")
+//       .isEmail()
+//       .normalizeEmail()
+//       .withMessage("Email is not valid!")
+//   ],
+//   async (req, res) => {
+//     const errors = validationResult(req);
+//     if (!errors.isEmpty()) {
+//       return res.status(422).json({ errors: errors.array() });
+//     }
+//     const email = req.params.email;
+//     try {
+//       const result = await Student.findOne({ email: req.params.email });
+//       res.send(result ? false : true);
+//     } catch (error) {
+//       console.log(error);
+//     }
+//   }
+// );
 
 router.post(
   "/",
@@ -65,10 +72,8 @@ router.post(
     if (!errors.isEmpty()) {
       return res.status(422).json({ errors: errors.array() });
     }
-    let student = {
-      ...req.body,
-      createdAt: new Date()
-    };
+    const { email, name, surname, dob } = req.body;
+    let student = { email, name, surname, dob };
     try {
       const newStudent = await Student.create(student);
       await newStudent.save();
